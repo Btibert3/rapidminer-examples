@@ -25,9 +25,17 @@
         <parameter key="use_processed_text" value="false"/>
         <description align="center" color="transparent" colored="false" width="126">Needs to be a dataset (pandas like)</description>
       </operator>
-      <operator activated="true" class="operator_toolbox:caching_subprocess" compatibility="2.9.000" expanded="true" height="103" name="Build Dataset" width="90" x="112" y="289">
+      <operator activated="false" class="python_scripting:execute_python" compatibility="9.9.000" expanded="true" height="82" name="Parse with spacy" width="90" x="380" y="34">
+        <parameter key="script" value="import pandas as pd&#10;import spacy&#10;import numpy as np&#10;&#10;&#10;# requires that the lang model has already been installed&#10;# python -m spacy download en_core_web_md&#10;&#10;&#10;# rm_main is a mandatory function, &#10;# the number of arguments has to be the number of input ports (can be none),&#10;#     or the number of input ports plus one if &quot;use macros&quot; parameter is set&#10;# if you want to use macros, use this instead and check &quot;use macros&quot; parameter:&#10;#def rm_main(data,macros):&#10;def rm_main(data):&#10;&#10;    # the real stuff&#10;    nlp = spacy.load(&quot;en_core_web_md&quot;)&#10;&#10;    docs = list(nlp.pipe(data.text))&#10;    vectors = [doc.vector for doc in docs]&#10;    vectors = np.array(vectors)&#10;    vectors = pd.DataFrame(vectors)&#10;    &#10;    # connect 2 output ports to see the results&#10;    #return data, data2&#10;    return vectors&#10;"/>
+        <parameter key="notebook_cell_tag_filter" value=""/>
+        <parameter key="use_default_python" value="true"/>
+        <parameter key="package_manager" value="conda (anaconda)"/>
+        <parameter key="use_macros" value="false"/>
+        <description align="center" color="transparent" colored="false" width="126">Requires a field called text in the dataframe. Not ideal, but perhaps more flexible way to define via RM</description>
+      </operator>
+      <operator activated="true" class="operator_toolbox:caching_subprocess" compatibility="2.9.000" expanded="true" height="103" name="Build Dataset" width="90" x="112" y="442">
         <parameter key="caching_strategy" value="auto"/>
-        <parameter key="cache_uuid" value="9130cddf-ac37-4247-84b2-430407220020"/>
+        <parameter key="cache_uuid" value="f83867e7-aa97-46f5-a4b3-cf49d2d23d58"/>
         <process expanded="true">
           <operator activated="true" class="read_csv" compatibility="9.9.000" expanded="true" height="68" name="Headlines" width="90" x="45" y="34">
             <parameter key="csv_file" value="https://raw.githubusercontent.com/kwartler/text_mining/master/all_3k_headlines.csv"/>
@@ -160,7 +168,7 @@
           <description align="center" color="yellow" colored="false" height="81" resized="true" width="381" x="272" y="536">This process has a lot going on, but is a result of brainstorming and building via iterations. It also highlights that it almost always requires that we break a problem down, which in a way, I really like</description>
         </process>
       </operator>
-      <operator activated="true" class="split_data" compatibility="9.9.000" expanded="true" height="103" name="Split Data" width="90" x="313" y="391">
+      <operator activated="true" class="split_data" compatibility="9.9.000" expanded="true" height="103" name="Split Data" width="90" x="313" y="544">
         <enumeration key="partitions">
           <parameter key="ratio" value="0.7"/>
           <parameter key="ratio" value="0.3"/>
@@ -169,7 +177,7 @@
         <parameter key="use_local_random_seed" value="false"/>
         <parameter key="local_random_seed" value="1992"/>
       </operator>
-      <operator activated="true" class="subprocess" compatibility="9.9.000" expanded="true" height="103" name="Build Models" width="90" x="447" y="391">
+      <operator activated="true" class="subprocess" compatibility="9.9.000" expanded="true" height="103" name="Build Models" width="90" x="514" y="544">
         <process expanded="true">
           <operator activated="true" class="multiply" compatibility="9.9.000" expanded="true" height="103" name="Training Multi" width="90" x="112" y="85"/>
           <operator activated="true" class="k_nn" compatibility="9.9.000" expanded="true" height="82" name="k-NN" width="90" x="246" y="34">
@@ -227,7 +235,7 @@
             <parameter key="use_local_random_seed" value="false"/>
             <parameter key="local_random_seed" value="1992"/>
             <process expanded="true">
-              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="Add Fully-Connected Layer" width="90" x="112" y="34">
+              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="layer1" width="90" x="112" y="34">
                 <parameter key="neurons" value="100"/>
                 <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
                 <parameter key="layer_name" value="one"/>
@@ -237,8 +245,9 @@
                 <parameter key="weight_initialization" value="Normal"/>
                 <parameter key="overwrite_networks_bias_initialization" value="false"/>
                 <parameter key="bias_initialization" value="0.0"/>
+                <description align="center" color="transparent" colored="false" width="126">100 neurons&lt;br/&gt;RELU with 75% dropout</description>
               </operator>
-              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="Add Fully-Connected Layer (2)" width="90" x="246" y="34">
+              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="layer2" width="90" x="313" y="34">
                 <parameter key="neurons" value="50"/>
                 <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
                 <parameter key="layer_name" value="two"/>
@@ -248,8 +257,9 @@
                 <parameter key="weight_initialization" value="Normal"/>
                 <parameter key="overwrite_networks_bias_initialization" value="false"/>
                 <parameter key="bias_initialization" value="0.0"/>
+                <description align="center" color="transparent" colored="false" width="126">50 neurons with RELU and 25% dropout</description>
               </operator>
-              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="Add Fully-Connected Layer (3)" width="90" x="380" y="34">
+              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="layer3" width="90" x="514" y="34">
                 <parameter key="neurons" value="10"/>
                 <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
                 <parameter key="layer_name" value="three"/>
@@ -259,8 +269,9 @@
                 <parameter key="weight_initialization" value="Normal"/>
                 <parameter key="overwrite_networks_bias_initialization" value="false"/>
                 <parameter key="bias_initialization" value="0.0"/>
+                <description align="center" color="transparent" colored="false" width="126">10 neurons with RELU, no dropout</description>
               </operator>
-              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="Add Fully-Connected Layer (4)" width="90" x="581" y="34">
+              <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.1.002" expanded="true" height="68" name="output layer" width="90" x="782" y="34">
                 <parameter key="neurons" value="2"/>
                 <parameter key="activation_function" value="Softmax"/>
                 <parameter key="layer_name" value="final"/>
@@ -270,17 +281,18 @@
                 <parameter key="weight_initialization" value="Normal"/>
                 <parameter key="overwrite_networks_bias_initialization" value="false"/>
                 <parameter key="bias_initialization" value="0.0"/>
+                <description align="center" color="transparent" colored="false" width="126">2 neurons as we have a binary problem&lt;br/&gt;softmax activation</description>
               </operator>
-              <connect from_port="in layerArchitecture" to_op="Add Fully-Connected Layer" to_port="layerArchitecture"/>
-              <connect from_op="Add Fully-Connected Layer" from_port="layerArchitecture" to_op="Add Fully-Connected Layer (2)" to_port="layerArchitecture"/>
-              <connect from_op="Add Fully-Connected Layer (2)" from_port="layerArchitecture" to_op="Add Fully-Connected Layer (3)" to_port="layerArchitecture"/>
-              <connect from_op="Add Fully-Connected Layer (3)" from_port="layerArchitecture" to_op="Add Fully-Connected Layer (4)" to_port="layerArchitecture"/>
-              <connect from_op="Add Fully-Connected Layer (4)" from_port="layerArchitecture" to_port="out layerArchitecture"/>
+              <connect from_port="in layerArchitecture" to_op="layer1" to_port="layerArchitecture"/>
+              <connect from_op="layer1" from_port="layerArchitecture" to_op="layer2" to_port="layerArchitecture"/>
+              <connect from_op="layer2" from_port="layerArchitecture" to_op="layer3" to_port="layerArchitecture"/>
+              <connect from_op="layer3" from_port="layerArchitecture" to_op="output layer" to_port="layerArchitecture"/>
+              <connect from_op="output layer" from_port="layerArchitecture" to_port="out layerArchitecture"/>
               <portSpacing port="source_in layerArchitecture" spacing="0"/>
               <portSpacing port="sink_out layerArchitecture" spacing="0"/>
             </process>
           </operator>
-          <operator activated="true" class="apply_model" compatibility="9.9.000" expanded="true" height="82" name="Apply DL" width="90" x="380" y="238">
+          <operator activated="true" class="apply_model" compatibility="9.9.000" expanded="true" height="82" name="Apply DL" width="90" x="380" y="340">
             <list key="application_parameters"/>
             <parameter key="create_view" value="false"/>
           </operator>
@@ -362,31 +374,27 @@
           <portSpacing port="sink_out 3" spacing="0"/>
         </process>
       </operator>
-      <operator activated="true" class="performance_to_data" compatibility="9.9.000" expanded="true" height="82" name="Performance to Data (2)" width="90" x="648" y="391"/>
-      <operator activated="true" class="performance_to_data" compatibility="9.9.000" expanded="true" height="82" name="Performance to Data" width="90" x="648" y="289"/>
-      <operator activated="false" class="python_scripting:execute_python" compatibility="9.9.000" expanded="true" height="82" name="Parse with spacy" width="90" x="380" y="34">
-        <parameter key="script" value="import pandas as pd&#10;import spacy&#10;import numpy as np&#10;&#10;&#10;# requires that the lang model has already been installed&#10;# python -m spacy download en_core_web_md&#10;&#10;&#10;# rm_main is a mandatory function, &#10;# the number of arguments has to be the number of input ports (can be none),&#10;#     or the number of input ports plus one if &quot;use macros&quot; parameter is set&#10;# if you want to use macros, use this instead and check &quot;use macros&quot; parameter:&#10;#def rm_main(data,macros):&#10;def rm_main(data):&#10;&#10;    # the real stuff&#10;    nlp = spacy.load(&quot;en_core_web_md&quot;)&#10;&#10;    docs = list(nlp.pipe(data.text))&#10;    vectors = [doc.vector for doc in docs]&#10;    vectors = np.array(vectors)&#10;    vectors = pd.DataFrame(vectors)&#10;    &#10;    # connect 2 output ports to see the results&#10;    #return data, data2&#10;    return vectors&#10;"/>
-        <parameter key="notebook_cell_tag_filter" value=""/>
-        <parameter key="use_default_python" value="true"/>
-        <parameter key="package_manager" value="conda (anaconda)"/>
-        <parameter key="use_macros" value="false"/>
-        <description align="center" color="transparent" colored="false" width="126">Requires a field called text in the dataframe. Not ideal, but perhaps more flexible way to define via RM</description>
-      </operator>
+      <operator activated="true" class="performance_to_data" compatibility="9.9.000" expanded="true" height="82" name="Deep Learning Perf" width="90" x="849" y="595"/>
+      <operator activated="true" class="performance_to_data" compatibility="9.9.000" expanded="true" height="82" name="kNN Perf" width="90" x="849" y="493"/>
       <connect from_op="Build Dataset" from_port="out 1" to_op="Split Data" to_port="example set"/>
       <connect from_op="Build Dataset" from_port="out 2" to_port="result 1"/>
       <connect from_op="Split Data" from_port="partition 1" to_op="Build Models" to_port="in 1"/>
       <connect from_op="Split Data" from_port="partition 2" to_op="Build Models" to_port="in 2"/>
-      <connect from_op="Build Models" from_port="out 1" to_op="Performance to Data" to_port="performance vector"/>
-      <connect from_op="Build Models" from_port="out 2" to_op="Performance to Data (2)" to_port="performance vector"/>
-      <connect from_op="Performance to Data (2)" from_port="example set" to_port="result 3"/>
-      <connect from_op="Performance to Data" from_port="example set" to_port="result 2"/>
+      <connect from_op="Build Models" from_port="out 1" to_op="kNN Perf" to_port="performance vector"/>
+      <connect from_op="Build Models" from_port="out 2" to_op="Deep Learning Perf" to_port="performance vector"/>
+      <connect from_op="Deep Learning Perf" from_port="example set" to_port="result 3"/>
+      <connect from_op="Deep Learning Perf" from_port="performance vector" to_port="result 5"/>
+      <connect from_op="kNN Perf" from_port="example set" to_port="result 2"/>
+      <connect from_op="kNN Perf" from_port="performance vector" to_port="result 4"/>
       <portSpacing port="source_input 1" spacing="0"/>
       <portSpacing port="sink_result 1" spacing="0"/>
       <portSpacing port="sink_result 2" spacing="0"/>
       <portSpacing port="sink_result 3" spacing="0"/>
       <portSpacing port="sink_result 4" spacing="0"/>
-      <description align="center" color="yellow" colored="false" height="213" resized="true" width="321" x="28" y="12">Basics, Simple Doc</description>
-      <description align="center" color="blue" colored="true" height="272" resized="true" width="254" x="30" y="238">Example to read in a real dataset and see that it gets parsed&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Results are cached&lt;br/&gt;Top output is parsed&lt;br/&gt;2nd output is original dataset</description>
+      <portSpacing port="sink_result 5" spacing="0"/>
+      <portSpacing port="sink_result 6" spacing="0"/>
+      <description align="center" color="yellow" colored="false" height="258" resized="true" width="513" x="28" y="12">Basics, Simple Doc</description>
+      <description align="center" color="blue" colored="true" height="272" resized="true" width="254" x="34" y="359">Example to read in a real dataset and see that it gets parsed&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Results are cached&lt;br/&gt;Top output is parsed&lt;br/&gt;2nd output is original dataset</description>
     </process>
   </operator>
 </process>
