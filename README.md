@@ -1,2 +1,5 @@
-# rapidminer-examples
-Example processes and POCs using RapidMiner 
+# About
+
+RapidMiner examples and POCs.
+
+
