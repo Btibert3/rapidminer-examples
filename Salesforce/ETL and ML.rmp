@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.9.000">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.9.000" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.9.000" expanded="true" height="68" name="Retrieve Salesforce tableau" width="90" x="45" y="238">
+        <parameter key="repository_entry" value="//salesforce/Connections/Salesforce tableau"/>
+      </operator>
+      <operator activated="false" class="multiply" compatibility="9.9.000" expanded="true" height="68" name="Multiply" width="90" x="313" y="238"/>
+      <operator activated="false" class="cloud_connectivity:read_salesforce" compatibility="9.9.000" expanded="true" height="82" name="Read Salesforce" width="90" x="380" y="85">
+        <parameter key="connection_source" value="repository"/>
+        <parameter key="query" value="SELECT Id FROM Case&#10;WHERE ( Actual_Intent__c != null )"/>
+        <parameter key="guess_value_types" value="true"/>
+        <parameter key="batch_size" value="1000"/>
+      </operator>
+      <operator activated="false" class="cloud_connectivity:delete_salesforce" compatibility="9.9.000" expanded="true" height="82" name="Delete Salesforce" width="90" x="514" y="85">
+        <parameter key="connection_source" value="repository"/>
+        <parameter key="skip_invalid" value="false"/>
+      </operator>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <description align="center" color="yellow" colored="false" height="294" resized="true" width="646" x="79" y="628">Multiple flows outlined by notes&lt;br&gt;&lt;br&gt;Auth and check data&lt;br&gt;&lt;br&gt;import training data and isolate test data&lt;br&gt;fit model on test data&lt;br&gt;&lt;br&gt;apply model to a sample of test data&lt;br&gt;&lt;br&gt;Look at data over time</description>
+      <description align="left" color="yellow" colored="false" height="169" resized="true" width="434" x="260" y="29">Phase 1&lt;br&gt;Clear out training data, in case you have some testing data</description>
+      <description align="left" color="yellow" colored="false" height="62" resized="true" width="319" x="219" y="433">Phase 2&lt;br&gt;Ingest data and flag train/test split</description>
+    </process>
+  </operator>
+</process>
