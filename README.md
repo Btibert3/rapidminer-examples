@@ -17,3 +17,13 @@ python -m spacy download en_core_web_md
 Finally, ensure that you have configured RapidMiner to use your `rapidminer` environment by default.  This can be found via RapidMiner > Preferences > Python.
 
 
+## TODO
+
+- faker example, perhaps to GCP, and then GCP to SFDC
+- wikipedia crawl for text mining with spacy
+
+
+
+
+
+
