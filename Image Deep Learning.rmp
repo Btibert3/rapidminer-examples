@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.001">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.001" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="operator_toolbox:caching_subprocess" compatibility="2.12.000" expanded="true" height="103" name="Subprocess (Caching)" width="90" x="45" y="34">
+        <parameter key="caching_strategy" value="auto"/>
+        <parameter key="cache_uuid" value="1ef0710c-c853-4cd2-a553-e63250955c14"/>
+        <process expanded="true">
+          <operator activated="true" class="image_handling:read_image_meta_data" compatibility="0.2.001" expanded="true" height="68" name="Read Image Meta Data" width="90" x="45" y="34">
+            <parameter key="directory" value="/Users/btibert/Downloads/cifar10/cifar10/train"/>
+            <parameter key="use_label" value="true"/>
+          </operator>
+          <operator activated="true" class="shuffle" compatibility="9.10.001" expanded="true" height="82" name="Shuffle" width="90" x="179" y="34">
+            <parameter key="use_local_random_seed" value="true"/>
+            <parameter key="local_random_seed" value="841"/>
+          </operator>
+          <operator activated="true" class="sample_stratified" compatibility="9.10.001" expanded="true" height="82" name="Sample (Stratified)" width="90" x="313" y="34">
+            <parameter key="sample" value="absolute"/>
+            <parameter key="sample_size" value="500"/>
+            <parameter key="sample_ratio" value="0.1"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
+          </operator>
+          <operator activated="true" class="image_handling:image_pre_processor" compatibility="0.2.001" expanded="true" height="103" name="Pre-Process Images" width="90" x="447" y="34">
+            <parameter key="path" value="Path"/>
+            <parameter key="use_label" value="false"/>
+            <process expanded="true">
+              <operator activated="true" class="image_handling:color_convert_image" compatibility="0.2.001" expanded="true" height="68" name="Color Convert Image" width="90" x="179" y="34">
+                <parameter key="convert_to_grey" value="true"/>
+              </operator>
+              <operator activated="true" class="image_handling:color_scale_image" compatibility="0.2.001" expanded="true" height="68" name="Color Scale Image" width="90" x="514" y="34">
+                <parameter key="minimum" value="0.0"/>
+                <parameter key="maximum" value="1.0"/>
+              </operator>
+              <connect from_port="transform" to_op="Color Convert Image" to_port="transformer"/>
+              <connect from_op="Color Convert Image" from_port="transformer" to_op="Color Scale Image" to_port="transformer"/>
+              <connect from_op="Color Scale Image" from_port="transformer" to_port="transform"/>
+              <portSpacing port="source_transform" spacing="0"/>
+              <portSpacing port="sink_transform" spacing="0"/>
+            </process>
+          </operator>
+          <connect from_op="Read Image Meta Data" from_port="output" to_op="Shuffle" to_port="example set input"/>
+          <connect from_op="Shuffle" from_port="example set output" to_op="Sample (Stratified)" to_port="example set input"/>
+          <connect from_op="Sample (Stratified)" from_port="example set output" to_op="Pre-Process Images" to_port="example set"/>
+          <connect from_op="Pre-Process Images" from_port="tensor" to_port="out 1"/>
+          <connect from_op="Pre-Process Images" from_port="preprocessing model" to_port="out 2"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="true" class="deeplearning:dl4j_tensor_sequential_neural_network" compatibility="1.2.000" expanded="true" height="145" name="Deep Learning (Tensor)" width="90" x="246" y="187">
+        <parameter key="epochs" value="5"/>
+        <parameter key="use_miniBatch" value="false"/>
+        <parameter key="batch_size" value="32"/>
+        <parameter key="log_each_epoch" value="true"/>
+        <parameter key="epochs_per_log" value="10"/>
+        <parameter key="optimization_method" value="Stochastic Gradient Descent"/>
+        <parameter key="backpropagation" value="Standard"/>
+        <parameter key="backpropagation_length" value="50"/>
+        <parameter key="use_early_stopping" value="false"/>
+        <parameter key="condition_strategy" value="score improvement"/>
+        <parameter key="patience" value="5"/>
+        <parameter key="minimal_score_improvement" value="0.0"/>
+        <parameter key="best_epoch_score" value="0.01"/>
+        <parameter key="max_iteration_score" value="3.0"/>
+        <parameter key="max_iteration_time" value="10"/>
+        <parameter key="updater" value="Adam"/>
+        <parameter key="learning_rate" value="0.01"/>
+        <parameter key="momentum" value="0.9"/>
+        <parameter key="rho" value="0.95"/>
+        <parameter key="epsilon" value="1.0E-6"/>
+        <parameter key="beta1" value="0.9"/>
+        <parameter key="beta2" value="0.999"/>
+        <parameter key="RMSdecay" value="0.95"/>
+        <parameter key="weight_initialization" value="Normal"/>
+        <parameter key="bias_initialization" value="0.0"/>
+        <parameter key="use_regularization" value="false"/>
+        <parameter key="l1_strength" value="0.1"/>
+        <parameter key="l2_strength" value="0.1"/>
+        <parameter key="cudnn_algo_mode" value="Prefer fastest"/>
+        <parameter key="infer_input_shape" value="true"/>
+        <parameter key="network_type" value="Simple Neural Network"/>
+        <parameter key="use_local_random_seed" value="false"/>
+        <parameter key="local_random_seed" value="1992"/>
+        <process expanded="true">
+          <operator activated="true" class="deeplearning:dl4j_convolutional_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Convolutional Layer" width="90" x="112" y="85">
+            <parameter key="number_of_activation_maps" value="16"/>
+            <parameter key="kernel_size" value="3.3"/>
+            <parameter key="stride_size" value="1.1"/>
+            <parameter key="padding_mode" value="Same"/>
+            <parameter key="padding_size" value="0.0"/>
+            <parameter key="dilation_factor" value="1.1"/>
+            <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
+            <parameter key="layer_name" value="cnn1"/>
+            <parameter key="use_dropout" value="false"/>
+            <parameter key="dropout_rate" value="0.25"/>
+            <parameter key="overwrite_networks_weight_initialization" value="false"/>
+            <parameter key="weight_initialization" value="Normal"/>
+            <parameter key="overwrite_networks_bias_initialization" value="false"/>
+            <parameter key="bias_initialization" value="0.0"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_dropout_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Dropout Layer" width="90" x="112" y="187">
+            <parameter key="use_dropout" value="true"/>
+            <parameter key="dropout_rate" value="0.25"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_convolutional_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Convolutional Layer (2)" width="90" x="112" y="289">
+            <parameter key="number_of_activation_maps" value="32"/>
+            <parameter key="kernel_size" value="3.3"/>
+            <parameter key="stride_size" value="1.1"/>
+            <parameter key="padding_mode" value="Same"/>
+            <parameter key="padding_size" value="0.0"/>
+            <parameter key="dilation_factor" value="1.1"/>
+            <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
+            <parameter key="layer_name" value="cnn2"/>
+            <parameter key="use_dropout" value="false"/>
+            <parameter key="dropout_rate" value="0.25"/>
+            <parameter key="overwrite_networks_weight_initialization" value="false"/>
+            <parameter key="weight_initialization" value="Normal"/>
+            <parameter key="overwrite_networks_bias_initialization" value="false"/>
+            <parameter key="bias_initialization" value="0.0"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_dropout_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Dropout Layer (2)" width="90" x="112" y="391">
+            <parameter key="use_dropout" value="true"/>
+            <parameter key="dropout_rate" value="0.25"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_convolutional_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Convolutional Layer (3)" width="90" x="112" y="493">
+            <parameter key="number_of_activation_maps" value="64"/>
+            <parameter key="kernel_size" value="3.3"/>
+            <parameter key="stride_size" value="1.1"/>
+            <parameter key="padding_mode" value="Same"/>
+            <parameter key="padding_size" value="0.0"/>
+            <parameter key="dilation_factor" value="1.1"/>
+            <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
+            <parameter key="layer_name" value="cnn3"/>
+            <parameter key="use_dropout" value="false"/>
+            <parameter key="dropout_rate" value="0.25"/>
+            <parameter key="overwrite_networks_weight_initialization" value="false"/>
+            <parameter key="weight_initialization" value="Normal"/>
+            <parameter key="overwrite_networks_bias_initialization" value="false"/>
+            <parameter key="bias_initialization" value="0.0"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_pooling_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Pooling Layer" width="90" x="313" y="493">
+            <parameter key="Pooling Method" value="max"/>
+            <parameter key="PNorm Value" value="1.0"/>
+            <parameter key="Kernel Size" value="3.3"/>
+            <parameter key="Stride Size" value="1.1"/>
+            <parameter key="padding_mode" value="Same"/>
+            <parameter key="padding_size" value="0.0"/>
+            <parameter key="layer_name" value="mp1"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_dense_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Fully-Connected Layer" width="90" x="447" y="238">
+            <parameter key="neurons" value="500"/>
+            <parameter key="activation_function" value="ReLU (Rectified Linear Unit)"/>
+            <parameter key="layer_name" value="fc1"/>
+            <parameter key="use_dropout" value="false"/>
+            <parameter key="dropout_rate" value="0.25"/>
+            <parameter key="overwrite_networks_weight_initialization" value="false"/>
+            <parameter key="weight_initialization" value="Normal"/>
+            <parameter key="overwrite_networks_bias_initialization" value="false"/>
+            <parameter key="bias_initialization" value="0.0"/>
+          </operator>
+          <operator activated="true" class="deeplearning:dl4j_output_layer" compatibility="1.2.000" expanded="true" height="68" name="Add Output Layer" width="90" x="782" y="136">
+            <parameter key="output_type" value="FullyConnected"/>
+            <parameter key="loss_function" value="Multiclass Cross Entropy (Classification)"/>
+            <parameter key="neurons" value="10"/>
+            <parameter key="activation_function" value="Softmax"/>
+            <parameter key="layer_name" value="outputlayer"/>
+            <parameter key="use_dropout" value="false"/>
+            <parameter key="dropout_rate" value="0.25"/>
+            <parameter key="overwrite_networks_weight_initialization" value="false"/>
+            <parameter key="weight_initialization" value="Normal"/>
+            <parameter key="overwrite_networks_bias_initialization" value="false"/>
+            <parameter key="bias_initialization" value="0.0"/>
+          </operator>
+          <connect from_port="in layerArchitecture" to_op="Add Convolutional Layer" to_port="layerArchitecture"/>
+          <connect from_op="Add Convolutional Layer" from_port="layerArchitecture" to_op="Add Dropout Layer" to_port="layerArchitecture"/>
+          <connect from_op="Add Dropout Layer" from_port="layerArchitecture" to_op="Add Convolutional Layer (2)" to_port="layerArchitecture"/>
+          <connect from_op="Add Convolutional Layer (2)" from_port="layerArchitecture" to_op="Add Dropout Layer (2)" to_port="layerArchitecture"/>
+          <connect from_op="Add Dropout Layer (2)" from_port="layerArchitecture" to_op="Add Convolutional Layer (3)" to_port="layerArchitecture"/>
+          <connect from_op="Add Convolutional Layer (3)" from_port="layerArchitecture" to_op="Add Pooling Layer" to_port="layerArchitecture"/>
+          <connect from_op="Add Pooling Layer" from_port="layerArchitecture" to_op="Add Fully-Connected Layer" to_port="layerArchitecture"/>
+          <connect from_op="Add Fully-Connected Layer" from_port="layerArchitecture" to_op="Add Output Layer" to_port="layerArchitecture"/>
+          <connect from_op="Add Output Layer" from_port="layerArchitecture" to_port="out layerArchitecture"/>
+          <portSpacing port="source_in layerArchitecture" spacing="0"/>
+          <portSpacing port="sink_out layerArchitecture" spacing="0"/>
+          <description align="center" color="yellow" colored="false" height="105" resized="false" width="180" x="701" y="220">like to explicit here, but appears to do a decent job at selecting params</description>
+          <description align="center" color="blue" colored="true" height="105" resized="false" width="180" x="150" y="581">100% arbitrary architecture above</description>
+        </process>
+      </operator>
+      <operator activated="true" class="nd4j:group_models_generic" compatibility="1.1.000" expanded="true" height="103" name="Group Models (Generic)" width="90" x="380" y="34"/>
+      <operator activated="true" class="image_handling:read_image_meta_data" compatibility="0.2.001" expanded="true" height="68" name="Read Image Meta Data (2)" width="90" x="380" y="391">
+        <parameter key="directory" value="/Users/btibert/Downloads/cifar10/cifar10/test/airplane"/>
+        <parameter key="use_label" value="true"/>
+      </operator>
+      <operator activated="true" class="nd4j:apply_model_generic" compatibility="1.1.000" expanded="true" height="82" name="Apply Model (Generic)" width="90" x="581" y="187"/>
+      <connect from_op="Subprocess (Caching)" from_port="out 1" to_op="Deep Learning (Tensor)" to_port="training set"/>
+      <connect from_op="Subprocess (Caching)" from_port="out 2" to_op="Group Models (Generic)" to_port="models in 1"/>
+      <connect from_op="Deep Learning (Tensor)" from_port="model" to_op="Group Models (Generic)" to_port="models in 2"/>
+      <connect from_op="Group Models (Generic)" from_port="model out" to_op="Apply Model (Generic)" to_port="model"/>
+      <connect from_op="Read Image Meta Data (2)" from_port="output" to_op="Apply Model (Generic)" to_port="unlabelled data"/>
+      <connect from_op="Apply Model (Generic)" from_port="labelled data" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <description align="center" color="yellow" colored="false" height="105" resized="false" width="180" x="105" y="566">Summary:&lt;br/&gt;&lt;br/&gt;- Getting output, but all the same prediction so far</description>
+    </process>
+  </operator>
+</process>

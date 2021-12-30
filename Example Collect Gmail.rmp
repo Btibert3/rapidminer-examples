@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.001">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.001" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.10.001" expanded="true" height="68" name="Retrieve Gmail" width="90" x="112" y="34">
+        <parameter key="repository_entry" value="//Local Repository/Connections/Gmail"/>
+        <description align="center" color="transparent" colored="false" width="126">Need to use imap, 993 and TLS security&lt;br/&gt;</description>
+      </operator>
+      <operator activated="true" class="text:read_documents_mail" compatibility="9.4.000" expanded="true" height="82" name="Read Documents (Mail)" width="90" x="313" y="34">
+        <parameter key="define_store" value="explicit"/>
+        <parameter key="jndi_name" value="java:/Mail"/>
+        <list key="connection_properties"/>
+        <parameter key="break_on_invalid_emails" value="false"/>
+        <parameter key="only_unseen" value="true"/>
+        <parameter key="mark_seen" value="true"/>
+        <parameter key="delete_messages" value="false"/>
+        <parameter key="recursive" value="false"/>
+        <parameter key="folder" value="INBOX"/>
+      </operator>
+      <connect from_op="Retrieve Gmail" from_port="output" to_op="Read Documents (Mail)" to_port="connection"/>
+      <connect from_op="Read Documents (Mail)" from_port="output" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <description align="center" color="yellow" colored="false" height="105" resized="false" width="180" x="69" y="211">The key is TLS security on the IMAP connection</description>
+    </process>
+  </operator>
+</process>
